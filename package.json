@@ -1,0 +1,7 @@
+{
+    "name":"jthreader",
+    "dependencies": {
+        "node-static":"~0.7.3",
+        "nthen":"0.1.1"
+    }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>JThreader - Understanding the Crash</title>
+
+  <!-- Piwik -->
+  <script type="text/javascript">
+    var _paq = _paq || [];
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u=(("https:" == document.location.protocol) ? "https" : "http") + "://piwik.xwiki.com/";
+      _paq.push(['setTrackerUrl', u+'piwik.php']);
+      _paq.push(['setSiteId', 5]);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+      g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <noscript><p><img src="http://piwik.xwiki.com/piwik.php?idsite=5" style="border:0;" alt="" /></p></noscript>
+  <!-- End Piwik Code -->
+
+  <script type="text/javascript" src="jquery-2.1.1.min.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+  <link type="text/css" href="main.css" rel="stylesheet" media="all">
+
+</head>
+<body>
+
+<h1>JThreader - Understanding the Crash</h1>
+
+<div id="nojs">
+  <noscript>
+    <h2>Hmm it seems you don't have javascript or you turned it off</h2>
+    <p>This site really requires it :(</p>
+  </noscript>
+</div>
+
+<div id="pageone" style="display:none">
+  <p>Paste your Java Thread Dump here and click Explain It</p>
+  <p>
+    Alternatively you can send the dump directly from your server with:
+    <br>
+    <tt>curl --data-binary @my_thread_dump.txt http://jthreader.xwiki.com/api/1/explain</tt>
+  </p>
+  <form>
+    <table>
+      <tr>
+        <td><textarea id="content" cols="0" rows="0" class="textarea"></textarea></td>
+      </tr>
+      <tr>
+        <td><input type="submit" id="explain-it" value="Explain It"></td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<div id="pagetwo" style="display:none">
+  <pre id="result">
+    Loading...
+  </pre>
+</div>
+
+<div id="hosted-by">Made with love in Paris, by <a href="https://xwiki.com/">XWiki SAS</a></div>
+</body>
