@@ -2,3 +2,33 @@
     width:800px;
     height:500px;
 }
+
+.footer {
+    margin-top:20px;
+}
+
+/* JThreader Analises */
+
+.jta-hidden {
+    display:none;
+}
+
+.jta-submenu {
+    margin-left:20px;
+}
+
+.jta-menuheader {
+    margin-bottom:-10px;
+    font-family:monospace;
+    cursor:pointer;
+}
+
+.jta-warning {
+    border: 1px dotted #999999;
+    margin: 4px 0;
+    padding: 8px 28px;
+    text-align: justify;
+    background: #EFEFEF 6px 8px no-repeat;
+    color: #D09000;
+    font-size: 1.5em;
+}

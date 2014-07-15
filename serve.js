@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var JThreader = require('./JThreader.js');
 var Static = require('node-static');
 var Http = require('http');
 var nThen = require('nthen');
@@ -24,20 +23,7 @@ var Fs = require('fs');
 var PORT = 8099;
 var WWWPATH = __dirname +'/www';
 var DATAPATH = __dirname + '/../jthreader_data/';
-var SERVERNAME = 'http://jthreader.xwiki.com/';
-
-var analyze = function (request, response) {
-    var data = '';
-    request.on('data', function (d) { data += d.toString('utf8'); });
-    request.on('end', function () {
-        var result;
-        try {
-            result = JThreader.processDump(data);
-        } catch (e) { result = e.message + '\n\n' + e.stack; }
-        response.writeHead(200, {"Content-Type": "text/plain"});
-        response.end(result+'\n');
-    });
-};
+var SERVERNAME = process.env.SERVERNAME || 'http://jthreader.xwiki.com/';
 
 var uid = function () {
     return Math.random().toString(36).substring(2);
@@ -45,7 +31,6 @@ var uid = function () {
 
 var upload = function (request, response) {
     var data = '';
-    var result;
     var id = uid();
     var abort = false;
     request.on('data', function (d) {
@@ -60,14 +45,7 @@ var upload = function (request, response) {
         if (abort) { waitFor.abort(); }
         request.on('end', waitFor());
     }).nThen(function (waitFor) {
-        try {
-            result = JThreader.processDump(data);
-        } catch (e) { result = e.message + '\n\n' + e.stack; }
-
         Fs.writeFile(DATAPATH + '/input/' + id + '.txt', data, waitFor(function (err) {
-            if (err) { throw err; }
-        }));
-        Fs.writeFile(DATAPATH + '/result/' + id + '.txt', result, waitFor(function (err) {
             if (err) { throw err; }
         }));
         var state = {
@@ -84,13 +62,12 @@ var upload = function (request, response) {
         }));
     }).nThen(function (waitFor) {
         response.writeHead(200, {"Content-Type": "text/plain"});
-        response.end(SERVERNAME + "#!/result/" + id + ".txt\n");
+        response.end(SERVERNAME + "#!/analysis/" + id + "\n");
     });
 };
 
 var apiReq = function (request, response) {
     if (request.url === '/api/1/explain') { return upload(request, response); }
-    if (request.url === '/api/1/analyze') { return analyze(request, response); }
     response.writeHead(200, {"Content-Type": "text/plain"});
     response.end("I'm sorry, Dave. I'm afraid I can't do that.\n");
 };
@@ -110,7 +87,7 @@ var startServer = function () {
     var data = new Static.Server(DATAPATH);
     Http.createServer(function (request, response) {
         if (request.url.indexOf('/api/1/') === 0) { return apiReq(request, response); }
-        if (request.url.indexOf('/result/') === 0) {
+        if (request.url.indexOf('/input/') === 0) {
             request.addListener('end', function () {
                 data.serve(request, response);
             }).resume();
@@ -128,7 +105,6 @@ var makeDirs = function (callback) {
         mkdir(DATAPATH, waitFor());
     }).nThen(function (waitFor) {
         mkdir(DATAPATH + '/input/', waitFor());
-        mkdir(DATAPATH + '/result/', waitFor());
         mkdir(DATAPATH + '/stats/', waitFor());
     }).nThen(callback);
 };

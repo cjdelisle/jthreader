@@ -1,4 +1,19 @@
 $(function () {
+
+    var escapeXML = function (data) {
+        return data.replace(/[<&]/g, function (char) {
+            switch (char) {
+                case '<': return '&lt;'
+                case '&': return '&amp;'
+                default: throw new Error();
+            }
+        });
+    };
+
+    var indent = function (string) {
+        return '    ' + string.split('\n').join('\n    ');
+    };
+
     var currentPage = $('#nojs');
     var show =  function (page) {
         currentPage.attr('style', 'display:none');
@@ -6,13 +21,52 @@ $(function () {
         currentPage.attr('style', '');
     };
 
+    var walkSubmenus = function () {
+        $('#result .jta-menuheader').each(function (i, elem) {
+            $(elem).click(function () {
+                var sm = $($(elem.parentNode).find('.jta-submenu')[0]);
+                sm.toggleClass('jta-hidden');
+                var pm = sm.hasClass('jta-hidden') ? '+' : '-';
+                $(elem).text($(elem).text().replace(/^\[[+-]\]/, '[' + pm + ']'));
+            });
+        });
+    };
+
     var pageTwo = function () {
         show('#pagetwo');
-        var path = window.location.href.replace(/.*#!/, '');
+        var path = window.location.href.replace(/.*#!\//, '');
+        var id = path.replace(/^.*\/|\.txt$/, '');
+        var reqType = path.replace(/\/.*$/, '');
         $.ajax({
-            url: path,
+            url: '/input/' + id + '.txt',
             method: 'GET',
-            success: function (ret) { $('#result').text(ret); }
+            success: function (ret) {
+                var result;
+                if (reqType === 'raw') {
+                    var analysisURL = window.location.href.replace(/\/#!\/raw\//, '/#!/analysis/');
+                    result = 'JThreader raw stack trace, see: <a href="' + analysisURL +'">' +
+                        analysisURL + '</a> for JThreader\'s analysis.\n\n';
+                    result += indent(escapeXML(ret));
+                } else {
+                    var rawURL = window.location.href.replace(/\/#!\/[^\/]*\//, '/#!/raw/');
+                    result = 'JThreader stack trace analysis, see: <a href="' + rawURL + '">' +
+                        rawURL + '</a> for the raw thread dump\n\n';
+                    try {
+                        result += JThreader.processDumpB(ret);
+                    } catch (e) {
+                        result += "**Parser Error:** The log appears to be incomplete or " +
+                            "damaged, try reading the raw form of the thread dump instead.\n\n" +
+                            indent("Cause: " + e.message + "\n" + e.stack);
+                    }
+                }
+                $('#result').html(result);
+                walkSubmenus();
+                $('#result a').each(function (i, a) {
+                    $(a).click(function () {
+                        setTimeout(pageTwo)
+                    });
+                });
+            }
         });
     };
 
