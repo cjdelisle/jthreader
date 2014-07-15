@@ -10,8 +10,8 @@ $(function () {
         });
     };
 
-    var indent = function (string) {
-        return '    ' + string.split('\n').join('\n    ');
+    var pre = function (string) {
+        return '<pre>' + string + '</pre>';
     };
 
     var currentPage = $('#nojs');
@@ -46,7 +46,7 @@ $(function () {
                     var analysisURL = window.location.href.replace(/\/#!\/raw\//, '/#!/analysis/');
                     result = 'JThreader raw stack trace, see: <a href="' + analysisURL +'">' +
                         analysisURL + '</a> for JThreader\'s analysis.\n\n';
-                    result += indent(escapeXML(ret));
+                    result += pre(escapeXML(ret));
                 } else {
                     var rawURL = window.location.href.replace(/\/#!\/[^\/]*\//, '/#!/raw/');
                     result = 'JThreader stack trace analysis, see: <a href="' + rawURL + '">' +
@@ -56,7 +56,7 @@ $(function () {
                     } catch (e) {
                         result += "**Parser Error:** The log appears to be incomplete or " +
                             "damaged, try reading the raw form of the thread dump instead.\n\n" +
-                            indent("Cause: " + e.message + "\n" + e.stack);
+                            pre("Cause: " + e.message + "\n" + e.stack);
                     }
                 }
                 $('#result').html(result);
