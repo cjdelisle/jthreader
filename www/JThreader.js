@@ -89,7 +89,7 @@ var error = function (lines, i) {
 };
 
 var PS_GENERATION =
-    /^\s(PSYoungGen|PSOldGen|PSPermGen)\s+total ([0-9]+)K, used ([0-9]+)K \[([a-f0-9,x ]+)\)$/;
+    /^\s(PSYoungGen|PSOldGen|ParOldGen|PSPermGen)\s+total ([0-9]+)K, used ([0-9]+)K \[([a-f0-9,x ]+)\)$/;
 var EDEN_FROM_TO = /\s+(eden|from|to) +space ([0-9]+)K, ([0-9]+)% used \[([a-f0-9, x ]+)\)$/;
 var OBJECT_SPACE = /\s+object space ([0-9]+)K, ([0-9]+)% used \[([a-f0-9, x ]+)\)$/;
 var parseHeap = function (out, lines, i) {
@@ -212,7 +212,7 @@ var printThread = function (out, thread, expanded) {
     submenu(out, thread.name, function () {
         out.push('<pre>');
         for (var i = 0; i < thread.rawLines.length; i++) {
-            out.push(thread.rawLines[i]);
+            out.push(escapeXML(thread.rawLines[i]));
         }
         out.push('</pre>');
     }, expanded);
@@ -231,12 +231,7 @@ var warning = function (text) {
 var INTERNAL_THREADS = /^(VM Thread|GC task thread.*|Low Memory Detector)$/;
 
 var processDumpB = module.exports.processDumpB = function (threadDump) {
-    var dump;
-    try {
-        dump = parseDump(threadDump.split('\n'));
-    } catch (e) {
-        return 'Error:\n' + e.message + '\n\n' + e.stack;
-    }
+    var dump = parseDump(threadDump.split('\n'));
 
     var out = [];
 

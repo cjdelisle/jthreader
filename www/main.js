@@ -35,7 +35,7 @@ $(function () {
     var pageTwo = function () {
         show('#pagetwo');
         var path = window.location.href.replace(/.*#!\//, '');
-        var id = path.replace(/^.*\/|\.txt$/, '');
+        var id = path.replace(/^.*\/|\.txt$/g, '');
         var reqType = path.replace(/\/.*$/, '');
         $.ajax({
             url: '/input/' + id + '.txt',
@@ -45,18 +45,18 @@ $(function () {
                 if (reqType === 'raw') {
                     var analysisURL = window.location.href.replace(/\/#!\/raw\//, '/#!/analysis/');
                     result = 'JThreader raw stack trace, see: <a href="' + analysisURL +'">' +
-                        analysisURL + '</a> for JThreader\'s analysis.\n\n';
+                        analysisURL + '</a> for JThreader\'s analysis.<br><br>';
                     result += pre(escapeXML(ret));
                 } else {
                     var rawURL = window.location.href.replace(/\/#!\/[^\/]*\//, '/#!/raw/');
                     result = 'JThreader stack trace analysis, see: <a href="' + rawURL + '">' +
-                        rawURL + '</a> for the raw thread dump\n\n';
+                        rawURL + '</a> for the raw thread dump<br><br>';
                     try {
                         result += JThreader.processDumpB(ret);
                     } catch (e) {
-                        result += "**Parser Error:** The log appears to be incomplete or " +
-                            "damaged, try reading the raw form of the thread dump instead.\n\n" +
-                            pre("Cause: " + e.message + "\n" + e.stack);
+                        result += "<strong>Parser Error:</strong> The log appears to be incomplete or " +
+                            "damaged, try reading the raw form of the thread dump instead.<br><br>" +
+                            pre(escapeXML("Cause: " + e.message + "\n" + e.stack));
                     }
                 }
                 $('#result').html(result);
