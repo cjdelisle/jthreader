@@ -35,16 +35,17 @@ var holdingLock = function (line) {
     return (line.match(HOLDING_LOCK) || [])[1];
 };
 
-var THREAD_HEADER = /^"([^"]+)" (daemon )?prio=([0-9]+) tid=(0x[0-9a-f]+) nid=(0x[0-9a-f]+) (.*)$/;
+
+var THREAD_HEADER = /^"([^"]+)" (#[0-9]+ )?(daemon )?(prio=[0-9]+ )?(os_prio=[0-9]+ )?tid=(0x[0-9a-f]+) nid=(0x[0-9a-f]+) (.*)$/;
 var parseThreadHeader = function (thread, line) {
     var out = THREAD_HEADER.exec(line);
     if (!out) { throw new Error("[" + line + "] does not match thread header regex"); }
     thread.name = out[1];
-    thread.daemon = (out[2] !== undefined);
-    thread.priority = Number(out[3]);
-    thread.tid = out[4];
-    thread.nid = out[5];
-    thread.state = out[6];
+    thread.daemon = (out[3] !== undefined);
+    thread.priority = out[4] ? Number(out[4].replace('prio=', '')) : 0;
+    thread.tid = out[5];
+    thread.nid = out[6];
+    thread.state = out[7];
 };
 
 var STACK_FRAME = /^\sat ([^\(]+)\(([^\)]+)\)$/;
@@ -88,10 +89,12 @@ var error = function (lines, i) {
     throw new Error("Failed to parse line number [" + i + "], with content [" + lines[i] + "]");
 };
 
+// PSYoungGen      total 2048K, used 1375K [0x00000000ef580000, 0x00000000ef880000, 0x0000000100000000)
+// 
 var PS_GENERATION =
-    /^\s(PSYoungGen|PSOldGen|ParOldGen|PSPermGen)\s+total ([0-9]+)K, used ([0-9]+)K \[([a-f0-9,x ]+)\)$/;
-var EDEN_FROM_TO = /\s+(eden|from|to) +space ([0-9]+)K, ([0-9]+)% used \[([a-f0-9, x ]+)\)$/;
-var OBJECT_SPACE = /\s+object space ([0-9]+)K, ([0-9]+)% used \[([a-f0-9, x ]+)\)$/;
+    /^\s?(PSYoungGen|PSOldGen|ParOldGen|PSPermGen)\s+total ([0-9]+)K, used ([0-9]+)K \[([a-f0-9,x ]+)\)$/;
+var EDEN_FROM_TO = /\s*(eden|from|to) +space ([0-9]+)K, ([0-9]+)% used \[([a-f0-9, x ]+)\)$/;
+var OBJECT_SPACE = /\s*object space ([0-9]+)K, ([0-9]+)% used \[([a-f0-9, x ]+)\)$/;
 var parseHeap = function (out, lines, i) {
     if (lines[i++] !== 'Heap') { throw new Error(); }
 
